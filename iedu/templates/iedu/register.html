@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Registrarion</title>
+  </head>
+
+  <body>
+    <h1>Registrarion</h1>
+    {% if registered %}
+    <strong>Спасибо за регистрацию!</strong>
+    {% else %}
+    <form id="user_form" method="post" action="/iedu/register/"
+	  enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ user_form.as_p }}
+      {{ profile_form.as_p }}
+      <input type="submit" name="submit" value="Register" />
+    </form>
+    {% endif %}
+    <p><a href="{% url 'iedu:index' %}">Back</a></p>
+  </body>
+</html>

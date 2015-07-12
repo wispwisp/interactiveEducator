@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>Interactive Educator</title>
+  </head>
+
+  <body>
+
+    {% if user.is_authenticated %}
+    <h1>Hello {{ user.username }}!</h1>
+    <div><a href="{% url 'iedu:slide' %}">Start Learning</a></div>
+    <div><a href="{% url 'iedu:logout' %}">Logout</a></div>
+    {% else %}
+    <h1>Hello, please register or login</h1>
+    <div><a href="{% url 'iedu:login' %}">Login</a></div>
+    <div><a href="{% url 'iedu:register' %}">Register</a></div>
+    {% endif %}
+
+  </body>
+
+</html>

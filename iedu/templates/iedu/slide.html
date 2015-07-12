@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+
+{% load staticfiles %}
+
+<html>
+
+  <head>
+    <title>{{ headword }}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'iedu/style.css' %}" />
+  </head>
+
+  <body>
+    <div>
+      <span><h1>{{ headword }}</h1></span>
+      <span>{{ text }}</span>
+
+      {% if question %}
+      <span><p>{{ question.text }}</p></span>
+      {% if errMesg %}
+      <span><p>{{ errMesg }}</p></span>
+      {% endif %}
+      <form method="post" action="{% url 'iedu:slide' %}">
+	{% csrf_token %}
+	{% for choice in question.choice_set.all %}
+	<input type="radio" name="choice" id="choice{{ forloop.counter }}"
+	       value="{{ choice.id }}" />
+	<label for="choice{{ forloop.counter }}">{{ choice.text }}</label><br />
+	{% endfor %}
+	<input type="submit" value="{{ button_value }}" />
+      </form>
+
+      {% else %}
+      <form method="post" action="{% url 'iedu:slide' %}">
+	{% csrf_token %}
+	<input type="submit" value="{{ button_value }}"/>
+      </form>
+
+      {% endif %}
+
+      <span><p><a href="{% url 'iedu:index' %}">На главный экран</a></p></span>
+    </div>
+  </body>
+
+</html>
