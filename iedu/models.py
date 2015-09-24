@@ -4,8 +4,14 @@ from django.contrib.auth.models import User
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
-    currentSlide = models.ForeignKey('Slide', blank=True, null=True,
+    currentSlide = models.ForeignKey('Slide',
+                                     related_name='current_slide',
+                                     blank=True, null=True,
                                      on_delete=models.SET_NULL)
+    nextSlide = models.ForeignKey('Slide',
+                                  related_name='next_slide',
+                                  blank=True, null=True,
+                                  on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.user.username
@@ -37,7 +43,7 @@ class Slide(models.Model):
     text = models.TextField()
     question = models.ForeignKey(Question, blank=True, null=True,
                                  on_delete=models.SET_NULL)
-    nextSlide = models.ForeignKey('Slide', blank=True, null=True,
+    nextSlide = models.ForeignKey('self', blank=True, null=True,
                                   on_delete=models.SET_NULL)
 
     def __str__(self):
@@ -46,13 +52,16 @@ class Slide(models.Model):
 
 class AdditionalSlide(Slide):
     theme = models.ForeignKey(Theme)
-    level = models.SmallIntegerField(default=0)
+    difficultyLevel = models.SmallIntegerField(default=0)
 
     def __str__(self):
         return self.theme.theme
 
 
 class Progress(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(UserProfile)
     theme = models.ForeignKey(Theme)
     score = models.SmallIntegerField(default=0)
+
+    def __str__(self):
+        return self.theme.theme + ": " + str(self.score)

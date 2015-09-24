@@ -25,6 +25,8 @@ def register(request):
             user.save()
             profile = profile_form.save(commit=False)
             profile.user = user
+            profile.currentSlide = Slide.objects.first()
+            profile.nextSlide = profile.currentSlide
             profile.save()
             registered = True
         else:
@@ -66,28 +68,42 @@ def user_logout(request):
 def slide(request):
     userProfile = request.user.userprofile
     slide = userProfile.currentSlide
-    if not slide:
-        slide = Slide.objects.all()[0]
-    contDict = Utils.createSlide(slide)
     if request.method == 'GET':
         return render(request,
                       'iedu/slide.html',
-                      contDict)
+                      Utils.createSlide(slide))
     # POST:
     if slide.question:
         if 'choice' not in request.POST:
+            contDict = Utils.createSlide(slide)
             contDict['errMesg'] = 'Выберите ответ'
             return render(request, 'iedu/slide.html', contDict)
         # grading:
-        progress, isCreated = request.user.progress_set.get_or_create(
-            theme=slide.question.theme, defaults={'user': request.user, 'score': 0}
+        progress, isCreated = userProfile.progress_set.get_or_create(
+            theme=slide.question.theme,
+            defaults={'user': userProfile, 'score': 0}
         )
         choice = Choice.objects.get(id=request.POST['choice'])
         if choice.isCorrect:
             progress.score += 1
             progress.save()
 
-    userProfile.currentSlide = slide.nextSlide
+    # progress checking, and slide order setup:
+    theme, isNeedAdditional = Utils.checkProgress(
+        userProfile.progress_set.order_by('score')
+    )
+    userProfile.nextSlide = userProfile.nextSlide.nextSlide
+    if isNeedAdditional:
+        userProfile.currentSlide = userProfile.nextSlide
+        aSlide, isAdditionalCreated = Utils.additionalSlide(theme)
+        if isAdditionalCreated:
+            userProfile.currentSlide = aSlide
+            # todo: additional slides chain; userProfile AddSlide State
+        else:
+            userProfile.currentSlide = userProfile.nextSlide
+    else:
+        userProfile.currentSlide = userProfile.nextSlide
+
     userProfile.save()
 
     return HttpResponseRedirect(reverse('iedu:slide'))

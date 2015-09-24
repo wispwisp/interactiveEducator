@@ -48,6 +48,10 @@ def populate():
         
         print("- {0}".format(str(s)), ", id: ", s.id)
 
+    lslide = Slide.objects.last()
+    fslide = Slide.objects.first()
+    lslide.nextSlide = fslide
+    lslide.save()
 
 if __name__ == '__main__':
     print("Starting population script...")

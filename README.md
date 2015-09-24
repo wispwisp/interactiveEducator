@@ -2,4 +2,4 @@
 tests and explanations
 
 todo
-* additional slide
+* additional slide chain
