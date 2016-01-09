@@ -1,55 +1,63 @@
 /* СКВОЗНЫЕ СТИЛИ */
 body {
-    padding-top: 20px;
+  padding-top: 20px;
 }
 nav .navbar_user {
-    float: right;
-    margin-right: 15px;
+  float: right;
+  margin-right: 15px;
 }
 nav .navbar_exit {
-    float: right;
-    margin-right: 30px;
+  float: right;
+  margin-right: 30px;
 }
 div.alert.alert-danger {
-    text-align: center;
+  text-align: center;
+}
+.jumbotron h2 {
+  color: #777;
+  text-align: center;
 }
 .jumbotron p {
-    font-size: 19px;
-    color: #777;
+  font-size: 19px;
+  color: #777;
 }
 footer.footer {
-    color: #777;
-    border-top: 1px solid #e5e5e5;
-    padding: 10px 0;
+  color: #777;
+  border-top: 1px solid #e5e5e5;
+  padding: 10px 0;
 }
 /* - СКВОЗНЫЕ СТИЛИ - */
 
 /* ГЛАВНАЯ СТРАНИЦА */
 .index-jumbotron {
-    text-align: center;
+  text-align: center;
+  padding-top: 30px !important;
+}
+.index-jumbotron a.btn {
+  margin: 15px 0;
 }
 /* - ГЛАВНАЯ СТРАНИЦА - */
 
 /* ФОРМА РЕГИСТРАЦИИ */
 .jumbotron {
-    padding-top: 10px;
+  padding-top: 10px;
 }
 .row,
 #user_form .form-group {
-    margin: 0;
+  margin: 0;
 }
 #user_form .form-control {
-    position: relative;
-    height: auto;
-    -webkit-box-sizing: border-box;
-       -moz-box-sizing: border-box;
-            box-sizing: border-box;
-    padding: 10px;
-    font-size: 16px;
+  position: relative;
+  height: auto;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 10px;
+  font-size: 16px;
 }
 #user_form .form-group.has-error .form-control,
 #user_form .form-control:focus {
-    z-index: 2;
+  z-index: 2;
 }
 #user_form input[type="text"] {
   margin-bottom: -1px;
@@ -67,3 +75,29 @@ footer.footer {
 }
 /* - ФОРМА РЕГИСТРАЦИИ - */
 
+/* СЛАЙД */
+.slide-jumbotron h2 {
+  margin-bottom: 20px;
+}
+.slide-jumbotron div.alert {
+  margin: 10px auto;
+  width: 50%;
+}
+.slide-jumbotron p.question-text {
+  font-weight: bold;
+}
+.slide-jumbotron input[type="radio"] {
+  display: none;
+}
+.slide-jumbotron label {
+  color: #337ab7;
+  padding-left: 0;
+}
+.slide-jumbotron label:hover i {
+  display: inline;
+}
+.slide-jumbotron label i {
+  color: #777;
+  display: none;
+}
+/* - СЛАЙД - */
