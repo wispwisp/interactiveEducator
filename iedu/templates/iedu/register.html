@@ -1,22 +1,70 @@
 <!DOCTYPE html>
+
+{% load staticfiles %}
+
 <html>
   <head>
-    <title>Registrarion</title>
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'iedu/style.css' %}" />
   </head>
 
   <body>
-    <h1>Registrarion</h1>
-    {% if registered %}
-    <strong>Спасибо за регистрацию!</strong>
-    {% else %}
-    <form id="user_form" method="post" action="/iedu/register/"
-	  enctype="multipart/form-data">
-      {% csrf_token %}
-      {{ user_form.as_p }}
-      {{ profile_form.as_p }}
-      <input type="submit" name="submit" value="Register" />
-    </form>
-    {% endif %}
-    <p><a href="{% url 'iedu:index' %}">Back</a></p>
+    <div class="container">
+
+      <nav class="navbar navbar-default">
+        <a class="navbar-brand" href="#">Interactive Educator</a>
+      </nav>
+
+      {% if registered %}
+        <div class="alert alert-success" role="alert">
+          Спасибо за регистрацию! <a href="{% url 'iedu:index' %}">На главную</a>
+        </div>
+      {% endif %}
+
+      <div class="jumbotron">
+        <div class="row">
+          <div class="col-md-6 col-md-offset-3">
+            <form id="user_form" method="POST">
+              <h2>Регистрация</h2>
+
+              {% csrf_token %}
+
+              <div class="alert alert-danger" role="alert">
+                Поле Email не может быть пустым.
+                <br>
+                Длина пароля должна быть больше 6 символов.
+              </div>
+
+              <!--
+                {{ user_form.as_p }}
+                {{ profile_form.as_p }}
+              Весртска для форм на бекенде ниже -->
+
+              <div class="form-group">
+                <label for="r_username" class="sr-only">Имя</label>
+                <input type="text" id="r_username" name="username" class="form-control" placeholder="Имя" required autofocus>
+              </div>
+
+              <div class="form-group">
+                <label for="r_email" class="sr-only">Email</label>
+                <input type="email" id="r_email" name="email" class="form-control" placeholder="Email" required>
+              </div>
+
+              <div class="form-group">
+                <label for="r_password" class="sr-only">Пароль</label>
+                <input type="password" id="r_password" name="password" class="form-control" placeholder="Пароль" required>
+              </div>
+
+              <input class="btn btn-lg btn-primary btn-block" type="submit" value="Продолжить">
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   </body>
 </html>

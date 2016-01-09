@@ -29,3 +29,41 @@ footer.footer {
     text-align: center;
 }
 /* - ГЛАВНАЯ СТРАНИЦА - */
+
+/* ФОРМА РЕГИСТРАЦИИ */
+.jumbotron {
+    padding-top: 10px;
+}
+.row,
+#user_form .form-group {
+    margin: 0;
+}
+#user_form .form-control {
+    position: relative;
+    height: auto;
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
+    padding: 10px;
+    font-size: 16px;
+}
+#user_form .form-group.has-error .form-control,
+#user_form .form-control:focus {
+    z-index: 2;
+}
+#user_form input[type="text"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+#user_form input[type="email"] {
+  margin-bottom: -1px;
+  border-radius: 0;
+}
+#user_form input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+/* - ФОРМА РЕГИСТРАЦИИ - */
+

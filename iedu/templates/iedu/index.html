@@ -54,6 +54,10 @@
         Длина пароля должна быть больше 6 символов.
       </div>
 
+      <!--<div class="alert alert-success" role="alert">
+        Спасибо за регистрацию! <a href="{% url 'iedu:index' %}">На главную</a>
+        </div>-->
+
       <div class="jumbotron index-jumbotron">
         {% if user.is_authenticated %}
         <p>Привет, {{ user.username }}!</p>
