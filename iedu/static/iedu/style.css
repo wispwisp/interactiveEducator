@@ -1,8 +1,31 @@
-div {
-    align:center;
-    font-family: Arial;
-}
-
+/* СКВОЗНЫЕ СТИЛИ */
 body {
-    background: white url("images/background.jpg");
+    padding-top: 20px;
 }
+nav .navbar_user {
+    float: right;
+    margin-right: 15px;
+}
+nav .navbar_exit {
+    float: right;
+    margin-right: 30px;
+}
+div.alert.alert-danger {
+    text-align: center;
+}
+.jumbotron p {
+    font-size: 19px;
+    color: #777;
+}
+footer.footer {
+    color: #777;
+    border-top: 1px solid #e5e5e5;
+    padding: 10px 0;
+}
+/* - СКВОЗНЫЕ СТИЛИ - */
+
+/* ГЛАВНАЯ СТРАНИЦА */
+.index-jumbotron {
+    text-align: center;
+}
+/* - ГЛАВНАЯ СТРАНИЦА - */
