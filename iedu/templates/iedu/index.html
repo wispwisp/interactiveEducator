@@ -1,22 +1,79 @@
 <!DOCTYPE html>
+
+{% load staticfiles %}
+
 <html>
 
   <head>
     <title>Interactive Educator</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'iedu/style.css' %}" />
   </head>
 
   <body>
+    <div class="container">
+      {% if user.is_authenticated %}
+        <nav class="navbar navbar-default">
+          <a class="navbar-brand" href="{% url 'iedu:index' %}">Interactive Educator</a>
+          <a class="btn btn-danger navbar-btn navbar_exit" href="{% url 'iedu:logout' %}">Выход</a>
+          <p class="navbar-text navbar_user">{{ user.username }}</p>
+        </nav>
+      {% else %}
+        <nav class="navbar navbar-default">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Показать меню</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="{% url 'iedu:index' %}">Interactive Educator</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <form id="login_form" method="POST" action="{% url 'iedu:login' %}" class="navbar-form navbar-right">
+                  {% csrf_token %}
+                  <div class="form-group">
+                    <label for="login_username" class="sr-only">Имя</label>
+                    <input type="text" name="username" id="login_username" placeholder="Имя" class="form-control">
+                  </div>
+                  <div class="form-group">
+                    <label for="login_password" class="sr-only">Пароль</label>
+                    <input type="password" name="password" id="login_password" placeholder="Пароль" class="form-control">
+                  </div>
+                  <button type="submit" class="btn btn-success">Вход</button>
+                </form>
+            </div><!--/.nav-collapse -->
+          </div><!--/.container-fluid -->
+        </nav>
+      {% endif %}
 
-    {% if user.is_authenticated %}
-    <h1>Hello {{ user.username }}!</h1>
-    <div><a href="{% url 'iedu:slide' %}">Start Learning</a></div>
-    <div><a href="{% url 'iedu:logout' %}">Logout</a></div>
-    {% else %}
-    <h1>Hello, please register or login</h1>
-    <div><a href="{% url 'iedu:login' %}">Login</a></div>
-    <div><a href="{% url 'iedu:register' %}">Register</a></div>
-    {% endif %}
+      <div class="alert alert-danger" role="alert">
+        Поле Email не может быть пустым.
+        <br>
+        Длина пароля должна быть больше 6 символов.
+      </div>
 
+      <!--<div class="alert alert-success" role="alert">
+        Спасибо за регистрацию! <a href="{% url 'iedu:index' %}">На главную</a>
+        </div>-->
+
+      <div class="jumbotron index-jumbotron">
+        {% if user.is_authenticated %}
+        <p>Привет, {{ user.username }}!</p>
+        <p>
+          <a class="btn btn-lg btn-primary" href="{% url 'iedu:slide' %}" role="button">Начать занятия</a>
+        </p>
+        {% else %}
+        <p>Вам потребуется учетная запись для работы с сервисом...</p>
+        <a class="btn btn-lg btn-primary" href="{% url 'iedu:register' %}" role="button">Создать аккаунт</a>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   </body>
 
 </html>
