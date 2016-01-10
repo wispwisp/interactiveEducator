@@ -39,5 +39,4 @@ def createSlide(slide):
         'headword': slide.headword,
         'text': slide.text,
         'question': slide.question,
-        'button_value': 'Принять'
     }

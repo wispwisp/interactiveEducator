@@ -54,8 +54,9 @@ def user_login(request):
                 return HttpResponse("Your account is disabled.")
         else:
             return HttpResponse("Invalid login details supplied.")
+    # Запретить GET для 'iedu/login.html'
     else:
-        return render(request, 'iedu/login.html', {})
+        return render(request, 'iedu/login.html')
 
 
 @login_required
@@ -83,7 +84,7 @@ def slide(request):
             theme=slide.question.theme,
             defaults={'user': userProfile, 'score': 0}
         )
-        choice = Choice.objects.get(id=request.POST['choice'])
+        choice = Choice.objects.get(id=request.POST.get('choice'))
         if choice.isCorrect:
             progress.score += 1
             progress.save()
