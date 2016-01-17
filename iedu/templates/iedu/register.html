@@ -16,10 +16,14 @@
         <a class="navbar-brand" href="{% url 'iedu:index' %}">Interactive Educator</a>
       </nav>
 
-      {% if registered %}
-        <div class="alert alert-success" role="alert">
-          Спасибо за регистрацию! <a href="{% url 'iedu:index' %}">На главную</a>
-        </div>
+      {% if messages %}
+        {% for msg in messages %}
+          {% if msg.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+            <div class="alert alert-success" role="alert">{{ msg }}</div>
+          {% else %}
+            <div class="alert alert-danger" role="alert">{{ msg }}</div>
+          {% endif %}
+        {% endfor %}
       {% endif %}
 
       <div class="jumbotron">
@@ -30,15 +34,8 @@
 
               {% csrf_token %}
 
-              <div class="alert alert-danger" role="alert">
-                Поле Email не может быть пустым.
-                <br>
-                Длина пароля должна быть больше 6 символов.
-              </div>
-
-              <!--
-                {{ user_form.as_p }}
-                {{ profile_form.as_p }}
+              <!--<div class="form-group">{{ user_form.as_p }}</div>
+	      <div class="form-group">{{ profile_form.as_p }}</div>
               Весртска для форм на бекенде ниже -->
 
               <div class="form-group">

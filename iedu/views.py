@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, logout, login
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
+from django.contrib import messages
 
 from iedu.forms import UserForm, UserProfileForm
 from iedu.models import Slide, UserProfile, Choice, Progress, AdditionalSlide
@@ -15,7 +16,6 @@ def index(request):
 
 
 def register(request):
-    registered = False
     if request.method == 'POST':
         user_form = UserForm(data=request.POST)
         profile_form = UserProfileForm(data=request.POST)
@@ -28,8 +28,10 @@ def register(request):
             profile.currentSlide = Slide.objects.first()
             profile.nextSlide = profile.currentSlide
             profile.save()
-            registered = True
+            messages.success(request, 'Спасибо за регистрацию!')
+            return HttpResponseRedirect(reverse('iedu:index'))
         else:
+            # TODO django FORM stylization
             print(user_form.errors, profile_form.errors)
     else:
         user_form = UserForm()
@@ -37,8 +39,7 @@ def register(request):
     return render(request,
                   'iedu/register.html',
                   {'user_form': user_form,
-                   'profile_form': profile_form,
-                   'registered': registered})
+                   'profile_form': profile_form})
 
 
 def user_login(request):
@@ -49,11 +50,11 @@ def user_login(request):
         if user:
             if user.is_active:
                 login(request, user)
-                return HttpResponseRedirect(reverse('iedu:index'))
             else:
-                return HttpResponse("Your account is disabled.")
+                messages.error(request, 'Ваша учетная запись отключена.')
         else:
-            return HttpResponse("Invalid login details supplied.")
+            messages.error(request, 'Неверные регистрационные данные.')
+        return HttpResponseRedirect(reverse('iedu:index'))
     # Запретить GET для 'iedu/login.html'
     else:
         return render(request, 'iedu/login.html')
