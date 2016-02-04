@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate, logout, login
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib import messages
 
 from iedu.forms import UserForm, UserProfileForm
@@ -55,9 +55,8 @@ def user_login(request):
         else:
             messages.error(request, 'Неверные регистрационные данные.')
         return HttpResponseRedirect(reverse('iedu:index'))
-    # Запретить GET для 'iedu/login.html'
     else:
-        return render(request, 'iedu/login.html')
+        raise Http404
 
 
 @login_required
@@ -77,9 +76,8 @@ def slide(request):
     # POST:
     if slide.question:
         if 'choice' not in request.POST:
-            contDict = Utils.createSlide(slide)
-            contDict['errMesg'] = 'Выберите ответ'
-            return render(request, 'iedu/slide.html', contDict)
+            messages.error(request, 'Не дан ответ')
+            return HttpResponseRedirect(reverse('iedu:slide'))
         # grading:
         progress, isCreated = userProfile.progress_set.get_or_create(
             theme=slide.question.theme,

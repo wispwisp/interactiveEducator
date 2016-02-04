@@ -1,0 +1,35 @@
+{% if user.is_authenticated %}
+<nav class="navbar navbar-default">
+  <a class="navbar-brand" href="{% url 'iedu:index' %}">Interactive Educator</a>
+  <a class="btn btn-danger navbar-btn navbar_exit" href="{% url 'iedu:logout' %}">Выход</a>
+  <p class="navbar-text navbar_user">{{ user.username }}</p>
+</nav>
+{% else %}
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Показать меню</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="{% url 'iedu:index' %}">Interactive Educator</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <form id="login_form" method="POST" action="{% url 'iedu:login' %}" class="navbar-form navbar-right">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="login_username" class="sr-only">Имя</label>
+          <input type="text" name="username" id="login_username" placeholder="Имя" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="login_password" class="sr-only">Пароль</label>
+          <input type="password" name="password" id="login_password" placeholder="Пароль" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-success">Вход</button>
+      </form>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container-fluid -->
+</nav>
+{% endif %}
