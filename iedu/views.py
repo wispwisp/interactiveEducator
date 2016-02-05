@@ -30,9 +30,6 @@ def register(request):
             profile.save()
             messages.success(request, 'Спасибо за регистрацию!')
             return HttpResponseRedirect(reverse('iedu:index'))
-        else:
-            # TODO django FORM stylization
-            print(user_form.errors, profile_form.errors)
     else:
         user_form = UserForm()
         profile_form = UserProfileForm()
@@ -62,7 +59,7 @@ def user_login(request):
 @login_required
 def user_logout(request):
     logout(request)
-    return HttpResponseRedirect('/iedu')
+    return HttpResponseRedirect(reverse('iedu:index'))
 
 
 @login_required
@@ -74,11 +71,12 @@ def slide(request):
                       'iedu/slide.html',
                       Utils.createSlide(slide))
     # POST:
+
+    # grading:
     if slide.question:
         if 'choice' not in request.POST:
             messages.error(request, 'Не дан ответ')
             return HttpResponseRedirect(reverse('iedu:slide'))
-        # grading:
         progress, isCreated = userProfile.progress_set.get_or_create(
             theme=slide.question.theme,
             defaults={'user': userProfile, 'score': 0}
