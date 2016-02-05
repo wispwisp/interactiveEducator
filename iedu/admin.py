@@ -1,7 +1,5 @@
 from django.contrib import admin
-
-from iedu.models import UserProfile
-from iedu.models import Slide, Question, Choice, Theme, AdditionalSlide, Progress
+from iedu.models import Slide, Question, Choice, Theme, AdditionalSlide
 
 
 class ChoiceInline(admin.StackedInline):
