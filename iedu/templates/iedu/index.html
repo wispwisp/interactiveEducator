@@ -28,9 +28,11 @@
       <div class="jumbotron index-jumbotron">
         {% if user.is_authenticated %}
         <p>Привет, {{ user.username }}!</p>
-        <p>
-          <a class="btn btn-lg btn-primary" href="{% url 'iedu:slide' %}" role="button">Начать занятия</a>
+	{% for discipline in disciplines %}
+	<p>
+          <a class="btn btn-lg btn-primary" href="{% url 'iedu:slide' discipline %}" role="button">{{ discipline }}</a>
         </p>
+	{% endfor %}
         {% else %}
         <p>Вам потребуется учетная запись для работы с сервисом...</p>
         <a class="btn btn-lg btn-primary" href="{% url 'iedu:register' %}" role="button">Создать аккаунт</a>

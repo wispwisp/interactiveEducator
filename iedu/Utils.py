@@ -1,4 +1,4 @@
-from iedu.models import Slide, UserProfile, Progress, AdditionalSlide
+from iedu.models import Slide, UserProfile, UserThemeScore, AdditionalSlide
 
 
 def grouped(iterable, n):
@@ -22,20 +22,9 @@ def checkProgress(themesProgress, significentRange=5):
     return (None, False)
 
 
-def additionalSlide(theme):
-    print('need additional slide, by theme: ', theme)
-    slides = AdditionalSlide.objects.filter(theme=theme)
-    if slides:
-        print(slides)
-        # TODO: select slide by it difficult level
-        return (slides.first(), True)
-    else:
-        print('nope')
-        return (None, False)
-
-
-def createSlide(slide):
+def createSlideContext(discipline, slide):
     return {
+        'discipline': discipline,
         'headword': slide.headword,
         'text': slide.text,
         'question': slide.question,

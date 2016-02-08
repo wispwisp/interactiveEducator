@@ -34,7 +34,7 @@
 
         <p>{{ text }}</p>
 
-        <form id="slide-question-form" method="post" action="{% url 'iedu:slide' %}">
+        <form id="slide-question-form" method="post" action="{% url 'iedu:slide' discipline %}">
           {% csrf_token %}
 
           {% if question %}

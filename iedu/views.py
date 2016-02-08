@@ -6,13 +6,15 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib import messages
 
 from iedu.forms import UserForm, UserProfileForm
-from iedu.models import Slide, UserProfile, Choice, Progress, AdditionalSlide
+from iedu.models import Slide, UserProfile, Choice, UserThemeScore, AdditionalSlide, Discipline, UserSlideStatePerDiscipline
 
 from iedu import Utils
 
 
 def index(request):
-    return render(request, 'iedu/index.html')
+    return render(request,
+                  'iedu/index.html',
+                  {'disciplines':Discipline.objects.all()})
 
 
 def register(request):
@@ -25,8 +27,6 @@ def register(request):
             user.save()
             profile = profile_form.save(commit=False)
             profile.user = user
-            profile.currentSlide = Slide.objects.first()
-            profile.nextSlide = profile.currentSlide
             profile.save()
             messages.success(request, 'Спасибо за регистрацию!')
             return HttpResponseRedirect(reverse('iedu:index'))
@@ -63,45 +63,48 @@ def user_logout(request):
 
 
 @login_required
-def slide(request):
+def slide(request, discipline):
     userProfile = request.user.userprofile
-    slide = userProfile.currentSlide
+
+    slideState, slideStateCreated = UserSlideStatePerDiscipline.objects.get_or_create(
+        userProfile = userProfile,
+        discipline = Discipline.objects.get(name=discipline),
+        defaults={
+            #'sessionSlide:___',
+            'currentSlide': Slide.objects.all().first(),}, # SLIDE SHOULD HAVE A THEME
+    )
+
+    slide = slideState.currentSlide
     if request.method == 'GET':
         return render(request,
                       'iedu/slide.html',
-                      Utils.createSlide(slide))
+                      Utils.createSlideContext(
+                          discipline, slide))
     # POST:
 
     # grading:
     if slide.question:
         if 'choice' not in request.POST:
             messages.error(request, 'Не дан ответ')
-            return HttpResponseRedirect(reverse('iedu:slide'))
-        progress, isCreated = userProfile.progress_set.get_or_create(
+            return HttpResponseRedirect(reverse('iedu:slide',
+                                                args=[discipline]))
+        themeScore, isCreated = userProfile.userthemescore_set.get_or_create(
             theme=slide.question.theme,
-            defaults={'user': userProfile, 'score': 0}
+            defaults={'userProfile': userProfile, 'score': 0}
         )
         choice = Choice.objects.get(id=request.POST.get('choice'))
         if choice.isCorrect:
-            progress.score += 1
-            progress.save()
+            themeScore.score += 1
+            themeScore.save()
 
     # progress checking, and slide order setup:
     theme, isNeedAdditional = Utils.checkProgress(
-        userProfile.progress_set.order_by('score')
+        userProfile.userthemescore_set.order_by('score')
     )
-    userProfile.nextSlide = userProfile.nextSlide.nextSlide
+    slideState.currentSlide = slideState.currentSlide.nextSlide
+    slideState.save()
+
     if isNeedAdditional:
-        userProfile.currentSlide = userProfile.nextSlide
-        aSlide, isAdditionalCreated = Utils.additionalSlide(theme)
-        if isAdditionalCreated:
-            userProfile.currentSlide = aSlide
-            # todo: additional slides chain; userProfile AddSlide State
-        else:
-            userProfile.currentSlide = userProfile.nextSlide
-    else:
-        userProfile.currentSlide = userProfile.nextSlide
+        pass
 
-    userProfile.save()
-
-    return HttpResponseRedirect(reverse('iedu:slide'))
+    return HttpResponseRedirect(reverse('iedu:slide', args=[discipline]))

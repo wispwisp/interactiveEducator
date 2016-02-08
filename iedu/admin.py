@@ -1,5 +1,5 @@
 from django.contrib import admin
-from iedu.models import Slide, Question, Choice, Theme, AdditionalSlide
+from iedu.models import Slide, Question, Choice, Theme, AdditionalSlide, Discipline
 
 
 class ChoiceInline(admin.StackedInline):
@@ -12,6 +12,7 @@ class QuestionAdmin(admin.ModelAdmin):
 admin.site.register(Question, QuestionAdmin)
 
 
+admin.site.register(Discipline)
 admin.site.register(Slide)
 admin.site.register(AdditionalSlide)
 admin.site.register(Theme)
