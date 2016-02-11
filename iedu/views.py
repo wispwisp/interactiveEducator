@@ -103,7 +103,9 @@ def slide(request, disciplineName):
 
     # progress checking, and slide order setup:
     theme, isNeedAdditional = Utils.checkProgress(
-        userProfile.userthemescore_set.order_by('score')
+        userProfile.userthemescore_set
+        .filter(theme__discipline=discipline)
+        .order_by('score')
     )
     slideState.currentSlide = slideState.currentSlide.nextSlide
     slideState.save()
