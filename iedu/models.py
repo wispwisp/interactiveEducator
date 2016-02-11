@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 
 class Discipline(models.Model):
     name = models.TextField()
+    firstSlide = models.ForeignKey('Slide')
+
     def __str__(self):
         return self.name
 

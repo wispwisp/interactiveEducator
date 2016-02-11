@@ -63,23 +63,27 @@ def user_logout(request):
 
 
 @login_required
-def slide(request, discipline):
+def slide(request, disciplineName):
     userProfile = request.user.userprofile
-
+    discipline = Discipline.objects.get(name=disciplineName)
+    
     slideState, slideStateCreated = UserSlideStatePerDiscipline.objects.get_or_create(
         userProfile = userProfile,
-        discipline = Discipline.objects.get(name=discipline),
+        discipline = discipline,
         defaults={
-            #'sessionSlide:___',
-            'currentSlide': Slide.objects.all().first(),}, # SLIDE SHOULD HAVE A THEME
+            #'sessionSlide':'___',
+            'currentSlide': discipline.firstSlide,},
     )
 
     slide = slideState.currentSlide
+    if not slide:
+        raise Http404
+
     if request.method == 'GET':
         return render(request,
                       'iedu/slide.html',
                       Utils.createSlideContext(
-                          discipline, slide))
+                          disciplineName, slide))
     # POST:
 
     # grading:
@@ -87,7 +91,7 @@ def slide(request, discipline):
         if 'choice' not in request.POST:
             messages.error(request, 'Не дан ответ')
             return HttpResponseRedirect(reverse('iedu:slide',
-                                                args=[discipline]))
+                                                args=[disciplineName]))
         themeScore, isCreated = userProfile.userthemescore_set.get_or_create(
             theme=slide.question.theme,
             defaults={'userProfile': userProfile, 'score': 0}
@@ -107,4 +111,4 @@ def slide(request, discipline):
     if isNeedAdditional:
         pass
 
-    return HttpResponseRedirect(reverse('iedu:slide', args=[discipline]))
+    return HttpResponseRedirect(reverse('iedu:slide', args=[disciplineName]))
