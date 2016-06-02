@@ -1,4 +1,4 @@
-from iedu.models import Slide, UserProfile, UserThemeScore
+from iedu.models import Slide, UserProfile
 
 
 def grouped(iterable, n):
@@ -8,18 +8,6 @@ def grouped(iterable, n):
     (s2n,s2n+1,s2n+2,...s3n-1), ...
     """
     return zip(*[iter(iterable)] * n)
-
-
-def checkProgress(themesProgress, significentRange=5):
-    "return is need additional slide by theme and theme"
-    def isSignificantRange(f,s):
-        return f > s and f - s >= significentRange
-
-    for f, s in grouped(themesProgress.reverse(), 2):
-        if isSignificantRange(f.score, s.score):
-            return (s, True)
-
-    return (None, False)
 
 
 def createSlideContext(discipline, slide):

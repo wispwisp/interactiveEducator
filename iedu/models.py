@@ -18,10 +18,10 @@ class SlideChain(models.Model):
         return self.name
 
 
-class SlideChainTriggered(models.Model):
-    userProfile = models.ForeignKey('UserProfile')
-    slideChain = models.ForeignKey('SlideChain')
-    count = models.SmallIntegerField(default=0)
+#class SlideChainTriggered(models.Model):
+#    userProfile = models.ForeignKey('UserProfile')
+#    slideChain = models.ForeignKey('SlideChain')
+#    count = models.SmallIntegerField(default=0)
 
 
 class Discipline(models.Model):
@@ -53,16 +53,7 @@ class UserSlideStatePerDiscipline(models.Model):
 # Slide internals:
 
 
-class Theme(models.Model):
-    discipline = models.ForeignKey(Discipline)
-    name = models.TextField()
-
-    def __str__(self):
-        return self.name
-
-
 class Question(models.Model):
-    theme = models.ForeignKey(Theme)
     text = models.TextField()
 
     def __str__(self):
@@ -85,12 +76,3 @@ class Slide(models.Model):
 
     def __str__(self):
         return self.headword
-
-
-class UserThemeScore(models.Model):
-    userProfile = models.ForeignKey(UserProfile)
-    theme = models.ForeignKey(Theme)
-    score = models.SmallIntegerField(default=0)
-
-    def __str__(self):
-        return self.theme.name + ": " + str(self.score)

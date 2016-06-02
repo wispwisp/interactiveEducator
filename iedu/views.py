@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib import messages
 
 from iedu.forms import UserForm, UserProfileForm
-from iedu.models import Slide, UserProfile, Choice, UserThemeScore, Discipline, UserSlideStatePerDiscipline
+from iedu.models import Slide, UserProfile, Choice, Discipline, UserSlideStatePerDiscipline
 
 from iedu import Utils
 
@@ -66,7 +66,7 @@ def user_logout(request):
 def slide(request, disciplineName):
     userProfile = request.user.userprofile
     discipline = Discipline.objects.get(name=disciplineName) # Get ot Http404
-    
+
     slideState, slideStateCreated = UserSlideStatePerDiscipline.objects.get_or_create(
         userProfile = userProfile,
         discipline = discipline,
@@ -75,6 +75,8 @@ def slide(request, disciplineName):
     )
 
     slide = slideState.currentSlide
+    # obtaion slideChain form current slide here
+    # if not slideChain: 'free slide', just pass away
     if not slide:
         #evaluate slide chain progress
         #choose to:
@@ -90,20 +92,23 @@ def slide(request, disciplineName):
                           disciplineName, slide))
     # POST:
 
-    # grading:
+    # grading
+    # Slide could be without question - then just pass:
     if slide.question:
         if 'choice' not in request.POST:
             messages.error(request, 'Не дан ответ')
             return HttpResponseRedirect(reverse('iedu:slide',
                                                 args=[disciplineName]))
-        themeScore, isCreated = userProfile.userthemescore_set.get_or_create(
-            theme=slide.question.theme,
-            defaults={'userProfile': userProfile, 'score': 0}
-        )
+
         choice = Choice.objects.get(id=request.POST.get('choice'))
         if choice.isCorrect:
-            themeScore.score += 1
-            themeScore.save()
+            # current slide chain progress increment
+            # ?
+            # 1) get slideChain from current slide
+            # 2) inc per:_user_slideChain model field
+            # - yes slide can not be connected to any chain (no progress slide ?)
+            # ! INC count of connected slide. (Imortant but TODO better)
+            pass
 
     slideState.currentSlide = slideState.currentSlide.nextSlide
     slideState.save()
