@@ -1,4 +1,4 @@
-from iedu.models import Slide, UserProfile, UserThemeScore, AdditionalSlide
+from iedu.models import Slide, UserProfile, UserThemeScore
 
 
 def grouped(iterable, n):

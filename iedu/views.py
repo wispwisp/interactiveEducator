@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib import messages
 
 from iedu.forms import UserForm, UserProfileForm
-from iedu.models import Slide, UserProfile, Choice, UserThemeScore, AdditionalSlide, Discipline, UserSlideStatePerDiscipline
+from iedu.models import Slide, UserProfile, Choice, UserThemeScore, Discipline, UserSlideStatePerDiscipline
 
 from iedu import Utils
 
@@ -65,19 +65,23 @@ def user_logout(request):
 @login_required
 def slide(request, disciplineName):
     userProfile = request.user.userprofile
-    discipline = Discipline.objects.get(name=disciplineName)
+    discipline = Discipline.objects.get(name=disciplineName) # Get ot Http404
     
     slideState, slideStateCreated = UserSlideStatePerDiscipline.objects.get_or_create(
         userProfile = userProfile,
         discipline = discipline,
         defaults={
-            #'sessionSlide':'___',
-            'currentSlide': discipline.firstSlide,},
+            'currentSlide': discipline.begin.slide,},
     )
 
     slide = slideState.currentSlide
     if not slide:
-        raise Http404
+        #evaluate slide chain progress
+        #choose to:
+        # - setup clide chain again
+        # - change to additional slide chain
+        # - go to next slide chain
+        pass
 
     if request.method == 'GET':
         return render(request,
@@ -101,16 +105,7 @@ def slide(request, disciplineName):
             themeScore.score += 1
             themeScore.save()
 
-    # progress checking, and slide order setup:
-    theme, isNeedAdditional = Utils.checkProgress(
-        userProfile.userthemescore_set
-        .filter(theme__discipline=discipline)
-        .order_by('score')
-    )
     slideState.currentSlide = slideState.currentSlide.nextSlide
     slideState.save()
-
-    if isNeedAdditional:
-        pass
 
     return HttpResponseRedirect(reverse('iedu:slide', args=[disciplineName]))
