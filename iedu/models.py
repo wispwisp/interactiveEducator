@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 class SlideChain(models.Model):
     name = models.TextField()
     passingPercent = models.SmallIntegerField(default=70)
-    slide = models.ForeignKey('Slide')
     nextChain = models.ForeignKey('self',
                                   blank=True, null=True,
                                   on_delete=models.SET_NULL)
@@ -18,15 +17,9 @@ class SlideChain(models.Model):
         return self.name
 
 
-#class SlideChainTriggered(models.Model):
-#    userProfile = models.ForeignKey('UserProfile')
-#    slideChain = models.ForeignKey('SlideChain')
-#    count = models.SmallIntegerField(default=0)
-
-
 class Discipline(models.Model):
     name = models.TextField()
-    begin = models.ForeignKey('SlideChain')
+    begin = models.ForeignKey('Slide')
 
     def __str__(self):
         return self.name
@@ -50,6 +43,13 @@ class UserSlideStatePerDiscipline(models.Model):
                                      on_delete=models.SET_NULL)
 
 
+class UserSlideChainState(models.Model):
+    userProfile = models.ForeignKey(UserProfile)
+    slideChain = models.ForeignKey(SlideChain)
+    countOfProcessedSlides = models.SmallIntegerField(default=0)
+    numberOfCorrect = models.SmallIntegerField(default=0)
+    chainTriggered = models.SmallIntegerField(default=0)
+
 # Slide internals:
 
 
@@ -67,6 +67,8 @@ class Choice(models.Model):
 
 
 class Slide(models.Model):
+    chain = models.ForeignKey('SlideChain')
+
     headword = models.TextField()
     text = models.TextField()
     question = models.ForeignKey(Question, blank=True, null=True,
@@ -75,4 +77,4 @@ class Slide(models.Model):
                                   on_delete=models.SET_NULL)
 
     def __str__(self):
-        return self.headword
+        return self.chain.name + ": " + self.headword

@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib import messages
 
 from iedu.forms import UserForm, UserProfileForm
-from iedu.models import Slide, UserProfile, Choice, Discipline, UserSlideStatePerDiscipline
+from iedu.models import Slide, UserProfile, Choice, Discipline, UserSlideStatePerDiscipline, UserSlideChainState
 
 from iedu import Utils
 
@@ -67,23 +67,27 @@ def slide(request, disciplineName):
     userProfile = request.user.userprofile
     discipline = Discipline.objects.get(name=disciplineName) # Get ot Http404
 
+    # slide state per descipline:
     slideState, slideStateCreated = UserSlideStatePerDiscipline.objects.get_or_create(
         userProfile = userProfile,
         discipline = discipline,
         defaults={
-            'currentSlide': discipline.begin.slide,},
+            'currentSlide': discipline.begin,},
     )
 
     slide = slideState.currentSlide
-    # obtaion slideChain form current slide here
-    # if not slideChain: 'free slide', just pass away
     if not slide:
-        #evaluate slide chain progress
-        #choose to:
-        # - setup clide chain again
-        # - change to additional slide chain
-        # - go to next slide chain
-        pass
+        # TODO. star from begin for now
+        slide = discipline.begin
+        slideState.currentSlide = slide
+        slideState.save()
+        #raise Http404
+
+    # slide chain state:
+    chainState, chainStateCreated = UserSlideChainState.objects.get_or_create(
+        userProfile = userProfile,
+        slideChain = slide.chain,
+    )
 
     if request.method == 'GET':
         return render(request,
@@ -91,8 +95,6 @@ def slide(request, disciplineName):
                       Utils.createSlideContext(
                           disciplineName, slide))
     # POST:
-
-    # grading
     # Slide could be without question - then just pass:
     if slide.question:
         if 'choice' not in request.POST:
@@ -102,14 +104,16 @@ def slide(request, disciplineName):
 
         choice = Choice.objects.get(id=request.POST.get('choice'))
         if choice.isCorrect:
-            # current slide chain progress increment
-            # ?
-            # 1) get slideChain from current slide
-            # 2) inc per:_user_slideChain model field
-            # - yes slide can not be connected to any chain (no progress slide ?)
-            # ! INC count of connected slide. (Imortant but TODO better)
-            pass
+            chainState.numberOfCorrect += 1
 
+    # slide chain save state:
+    chainState.countOfProcessedSlides += 1 # TODO: change to query count
+    chainState.save() # Its also save changes form choice.isCorrect
+
+    # TODO when chain complete:
+    # print("chainTriggered: ", chainState.chainTriggered)
+
+    # save next slide
     slideState.currentSlide = slideState.currentSlide.nextSlide
     slideState.save()
 
