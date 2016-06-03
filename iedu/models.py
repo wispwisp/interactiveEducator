@@ -2,53 +2,89 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-class SlideChain(models.Model):
-    name = models.TextField()
-    passingPercent = models.SmallIntegerField(default=70)
-    nextChain = models.ForeignKey('self',
-                                  blank=True, null=True,
-                                  on_delete=models.SET_NULL)
-    addtitionalChain = models.ForeignKey('self',
-                                         related_name='additional',
-                                         blank=True, null=True,
-                                         on_delete=models.SET_NULL)
-
-    def __str__(self):
-        return self.name
-
-
-class Discipline(models.Model):
-    name = models.TextField()
-    begin = models.ForeignKey('Slide')
-
-    def __str__(self):
-        return self.name
-
-
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
     def __str__(self):
         return self.user.username
 
 
+class Discipline(models.Model):
+    name = models.TextField()
+    begin = models.ForeignKey('SlideChain',
+                              related_name='first_slide_chain',
+                              blank=True, null=True,
+                              on_delete=models.SET_NULL)
+    def __str__(self):
+        return self.name
+
+
+class SlideChain(models.Model):
+    discipline = models.ForeignKey(Discipline)
+    name = models.TextField()
+    passingPercent = models.SmallIntegerField(default=70)
+
+    nextChain = models.ForeignKey('self',
+                                  blank=True, null=True,
+                                  on_delete=models.SET_NULL)
+    additionalChain = models.ForeignKey('self',
+                                        related_name='additional',
+                                        blank=True, null=True,
+                                        on_delete=models.SET_NULL)
+
+    def getSlide(self, idx):
+        if idx > self.slide_set.count():
+            return None
+        return self.slide_set.get(index = idx)
+
+    def __str__(self):
+        return self.name
+
+
 # User education progress states:
 
 
-class UserSlideStatePerDiscipline(models.Model):
+class UserStatePerDiscipline(models.Model):
     userProfile = models.ForeignKey(UserProfile)
     discipline = models.ForeignKey(Discipline)
-    currentSlide = models.ForeignKey('Slide',
-                                     #related_name='current_slide',
-                                     blank=True, null=True,
-                                     on_delete=models.SET_NULL)
+    index = models.SmallIntegerField(default=0)
+    currentSlideChain = models.ForeignKey(SlideChain)
+
+    def getSlide(self):
+        return self.currentSlideChain.getSlide(self.index)
+
+    def prepareNextSlide(self):
+        self.index += 1
+
+    def rollBackToFirstSlide(self):
+        self.index = 0
+
+    def hasMoreSlides(self):
+        return self.index < (self.currentSlideChain.slide_set.count() - 1)
+
+    def switchChain(self, userChainState):
+        if userChainState.needAdditionalSlideChain:
+            if userChainState.triggered == 2:
+                if self.currentSlideChain.additionalChain:
+                    self.currentSlideChain = self.currentSlideChain.additionalChain
+        else:
+            if self.currentSlideChain.nextChain:
+                self.currentSlideChain = self.currentSlideChain.nextChain
+            # else - spin forever
+        # anyway - we changed to a new chain and should begin from the beggining:
+        self.rollBackToFirstSlide()
 
 
-class UserSlideChainState(models.Model):
+class UserChainState(models.Model):
     userProfile = models.ForeignKey(UserProfile)
     slideChain = models.ForeignKey(SlideChain)
-    countOfProcessedSlides = models.SmallIntegerField(default=0)
+
     numberOfCorrect = models.SmallIntegerField(default=0)
-    chainTriggered = models.SmallIntegerField(default=0)
+    triggered = models.SmallIntegerField(default=0)
+
+    def needAdditionalSlideChain(self):
+        return (self.numberOfCorrect /
+                self.slideChain.slide_set.count()) < (self.slideChain.passingPercent / 100)
+
 
 # Slide internals:
 
@@ -68,13 +104,12 @@ class Choice(models.Model):
 
 class Slide(models.Model):
     chain = models.ForeignKey('SlideChain')
+    index = models.SmallIntegerField(default=0)
 
     headword = models.TextField()
     text = models.TextField()
     question = models.ForeignKey(Question, blank=True, null=True,
                                  on_delete=models.SET_NULL)
-    nextSlide = models.ForeignKey('self', blank=True, null=True,
-                                  on_delete=models.SET_NULL)
 
     def __str__(self):
-        return self.chain.name + ": " + self.headword
+        return "[" + str(self.index) + "] " + self.chain.name + ": " + self.headword

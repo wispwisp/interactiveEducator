@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib import messages
 
 from iedu.forms import UserForm, UserProfileForm
-from iedu.models import Slide, UserProfile, Choice, Discipline, UserSlideStatePerDiscipline, UserSlideChainState
+from iedu.models import Slide, UserProfile, Choice, Discipline, UserStatePerDiscipline, UserChainState
 
 from iedu import Utils
 
@@ -64,37 +64,26 @@ def user_logout(request):
 
 @login_required
 def slide(request, disciplineName):
-    userProfile = request.user.userprofile
-    discipline = Discipline.objects.get(name=disciplineName) # Get ot Http404
 
-    # slide state per descipline:
-    slideState, slideStateCreated = UserSlideStatePerDiscipline.objects.get_or_create(
+    userProfile = request.user.userprofile
+    discipline = Discipline.objects.get(name=disciplineName)
+    userSlideState, _ = UserStatePerDiscipline.objects.get_or_create(
         userProfile = userProfile,
         discipline = discipline,
-        defaults={
-            'currentSlide': discipline.begin,},
-    )
+        defaults={'currentSlideChain': discipline.begin},)
 
-    slide = slideState.currentSlide
-    if not slide:
-        # TODO. star from begin for now
-        slide = discipline.begin
-        slideState.currentSlide = slide
-        slideState.save()
-        #raise Http404
-
-    # slide chain state:
-    chainState, chainStateCreated = UserSlideChainState.objects.get_or_create(
-        userProfile = userProfile,
-        slideChain = slide.chain,
-    )
+    slide = userSlideState.getSlide()
 
     if request.method == 'GET':
         return render(request,
                       'iedu/slide.html',
-                      Utils.createSlideContext(
-                          disciplineName, slide))
+                      Utils.createSlideContext(disciplineName, slide))
+
     # POST:
+    userChainState, _ = UserChainState.objects.get_or_create(
+        userProfile = userProfile,
+        slideChain = slide.chain,)
+
     # Slide could be without question - then just pass:
     if slide.question:
         if 'choice' not in request.POST:
@@ -104,17 +93,14 @@ def slide(request, disciplineName):
 
         choice = Choice.objects.get(id=request.POST.get('choice'))
         if choice.isCorrect:
-            chainState.numberOfCorrect += 1
+            userChainState.numberOfCorrect += 1
 
-    # slide chain save state:
-    chainState.countOfProcessedSlides += 1 # TODO: change to query count
-    chainState.save() # Its also save changes form choice.isCorrect
+    if userSlideState.hasMoreSlides():
+        userSlideState.prepareNextSlide()
+    else:
+        userChainState.triggered += 1
+        userSlideState.switchChain(userChainState)
 
-    # TODO when chain complete:
-    # print("chainTriggered: ", chainState.chainTriggered)
-
-    # save next slide
-    slideState.currentSlide = slideState.currentSlide.nextSlide
-    slideState.save()
-
+    userSlideState.save()
+    userChainState.save()
     return HttpResponseRedirect(reverse('iedu:slide', args=[disciplineName]))
