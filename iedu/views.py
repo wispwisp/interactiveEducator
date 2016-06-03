@@ -70,10 +70,11 @@ def slide(request, disciplineName):
     userSlideState, _ = UserStatePerDiscipline.objects.get_or_create(
         userProfile = userProfile,
         discipline = discipline,
-        defaults={'currentSlideChain': discipline.begin},)
+        defaults={'currentSlideChain': discipline.begin})
 
     slide = userSlideState.getSlide()
 
+    # GET:
     if request.method == 'GET':
         return render(request,
                       'iedu/slide.html',
@@ -82,7 +83,7 @@ def slide(request, disciplineName):
     # POST:
     userChainState, _ = UserChainState.objects.get_or_create(
         userProfile = userProfile,
-        slideChain = slide.chain,)
+        slideChain = slide.chain)
 
     # Slide could be without question - then just pass:
     if slide.question:

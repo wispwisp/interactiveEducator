@@ -36,6 +36,9 @@ class SlideChain(models.Model):
             return None
         return self.slide_set.get(index = idx)
 
+    def countSlidesWithoutQuestions(self):
+        return self.slide_set.exclude(question__isnull=True).count()
+
     def __str__(self):
         return self.name
 
@@ -62,15 +65,13 @@ class UserStatePerDiscipline(models.Model):
         return self.index < (self.currentSlideChain.slide_set.count() - 1)
 
     def switchChain(self, userChainState):
-        if userChainState.needAdditionalSlideChain:
+        if userChainState.needAdditionalSlideChain():
             if userChainState.triggered == 2:
                 if self.currentSlideChain.additionalChain:
                     self.currentSlideChain = self.currentSlideChain.additionalChain
         else:
             if self.currentSlideChain.nextChain:
                 self.currentSlideChain = self.currentSlideChain.nextChain
-            # else - spin forever
-        # anyway - we changed to a new chain and should begin from the beggining:
         self.rollBackToFirstSlide()
 
 
@@ -82,8 +83,11 @@ class UserChainState(models.Model):
     triggered = models.SmallIntegerField(default=0)
 
     def needAdditionalSlideChain(self):
-        return (self.numberOfCorrect /
-                self.slideChain.slide_set.count()) < (self.slideChain.passingPercent / 100)
+        N = self.slideChain.countSlidesWithoutQuestions()
+        if N == 0:
+            return False
+        else:
+            return (self.numberOfCorrect / N) < (self.slideChain.passingPercent / 100)
 
 
 # Slide internals:
